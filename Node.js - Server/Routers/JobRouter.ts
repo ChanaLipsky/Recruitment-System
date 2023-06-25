@@ -2,7 +2,6 @@
 
 import { Router, Request, Response } from 'express';
 import JobModel, { IJob } from '../models/JobModel';
-
 const router: Router = Router();
 
 // GET /users
