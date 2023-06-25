@@ -1,56 +1,54 @@
 import * as mongoose from 'mongoose';
-import { JobSchema } from '../models/JobModel';
+import { JobSchema, JobModel } from '../models/JobModel';
 import { Request, Response } from 'express';
 
-const Job = mongoose.model('Job', JobSchema);
+export class JobController {
+    private handleResponse(res: Response, err: any, data: any) {
+        if (err) {
+            res.send(err);
+        } else {
+            res.json(data);
+        }
+    }
 
-export class JobController{
+    public async addNewJob(req: Request, res: Response) {
+        let newJob = new JobModel(req.body);
 
-    public addNewJob (req: Request, res: Response) {                
-        let newJob = new Job(req.body);
-    
-        newJob.save((err, job) => {
-            if(err){
-                res.send(err);
-            }    
-            res.json(job);
+        await newJob.save((err, job) => {
+            this.handleResponse(res, err, job);
         });
     }
 
-    public getJobs (req: Request, res: Response) {           
-        Job.find({}, (err, contact) => {
-            if(err){
-                res.send(err);
+    public async getJobs(req: Request, res: Response) {
+        await JobModel.find({}, (err, jobs) => {
+            this.handleResponse(res, err, jobs);
+        });
+    }
+
+    public async getJobWithID(req: Request, res: Response) {
+        await JobModel.findById(req.params.jobId, (err, job) => {
+            this.handleResponse(res, err, job);
+        });
+    }
+
+    public async updateJob(req: Request, res: Response) {
+        await JobModel.findOneAndUpdate(
+            { _id: req.params.jobId },
+            req.body,
+            { new: true },
+            (err, job) => {
+                this.handleResponse(res, err, job);
             }
-            res.json(contact);
-        });
+        );
     }
 
-    public getJobWithID (req: Request, res: Response) {           
-        Job.findById(req.params.jobId, (err, job) => {
-            if(err){
+    public async deleteJob(req: Request, res: Response) {
+        await JobModel.remove({ _id: req.params.jobId }, (err, job) => {
+            if (err) {
                 res.send(err);
+            } else {
+                res.json({ message: 'Successfully deleted job!' });
             }
-            res.json(job);
         });
     }
-
-    public updateJob (req: Request, res: Response) {           
-        Job.findOneAndUpdate({ _id: req.params.jobId }, req.body, { new: true }, (err, job) => {
-            if(err){
-                res.send(err);
-            }
-            res.json(job);
-        });
-    }
-
-    public deleteJob (req: Request, res: Response) {           
-        Job.remove({ _id: req.params.jobId }, (err, job) => {
-            if(err){
-                res.send(err);
-            }
-            res.json({ message: 'Successfully deleted job!'});
-        });
-    }
-    
 }
