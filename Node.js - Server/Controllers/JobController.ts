@@ -1,54 +1,96 @@
-import * as mongoose from 'mongoose';
-import { JobSchema, JobModel } from '../models/JobModel';
 import { Request, Response } from 'express';
+import Job, { IJob } from '../models/Job';
 
-export class JobController {
-    private handleResponse(res: Response, err: any, data: any) {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(data);
-        }
+export const createJob = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      name,
+      location,
+      date,
+      companyDescription,
+      jobDescription,
+      requirements,
+    } = req.body;
+
+    const job: IJob = new Job({
+      name,
+      location,
+      date,
+      companyDescription,
+      jobDescription,
+      requirements,
+    });
+
+    const savedJob = await job.save();
+    res.json(savedJob);
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while creating the job.', error });
+  }
+};
+
+export const updateJob = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      name,
+      location,
+      date,
+      companyDescription,
+      jobDescription,
+      requirements,
+    } = req.body;
+
+    const job = await Job.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        location,
+        date,
+        companyDescription,
+        jobDescription,
+        requirements,
+      },
+      { new: true }
+    );
+
+    if (!job) {
+       res.status(404).json({ message: 'Job not found.' });
     }
 
-    public async addNewJob(req: Request, res: Response) {
-        let newJob = new JobModel(req.body);
+    res.json(job);
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while updating the job.', error });
+  }
+};
 
-        await newJob.save((err, job) => {
-            this.handleResponse(res, err, job);
-        });
-    }
+export const getJobs = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const jobs = await Job.find();
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while fetching the jobs.', error });
+  }
+};
 
-    public async getJobs(req: Request, res: Response) {
-        await JobModel.find({}, (err, jobs) => {
-            this.handleResponse(res, err, jobs);
-        });
+export const getJobById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+       res.status(404).json({ message: 'Job not found.' });
     }
+    res.json(job);
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while fetching the job.', error });
+  }
+};
 
-    public async getJobWithID(req: Request, res: Response) {
-        await JobModel.findById(req.params.jobId, (err, job) => {
-            this.handleResponse(res, err, job);
-        });
+export const deleteJob = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const job = await Job.findByIdAndDelete(req.params.id);
+    if (!job) {
+       res.status(404).json({ message: 'Job not found.' });
     }
-
-    public async updateJob(req: Request, res: Response) {
-        await JobModel.findOneAndUpdate(
-            { _id: req.params.jobId },
-            req.body,
-            { new: true },
-            (err, job) => {
-                this.handleResponse(res, err, job);
-            }
-        );
-    }
-
-    public async deleteJob(req: Request, res: Response) {
-        await JobModel.remove({ _id: req.params.jobId }, (err, job) => {
-            if (err) {
-                res.send(err);
-            } else {
-                res.json({ message: 'Successfully deleted job!' });
-            }
-        });
-    }
-}
+    res.json({ message: 'Job deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred while deleting the job.', error });
+  }
+};
