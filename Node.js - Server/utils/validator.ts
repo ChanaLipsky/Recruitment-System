@@ -44,12 +44,13 @@ export const validateRequirements = (requirements: string[]): boolean => {
   return requirements.every((requirement) => typeof requirement === 'string' && validateString(requirement));
 };
 
-export const validateJobId = async (id: string): Promise<boolean> => {
-  const job = await Job.findOne({ id });
-  return !job;
+export const validateJobId =  (id: string):boolean=> {
+  // const job = await Job.findOne({ id });
+  // return !job;
+  return true
 };
 
-export const validateCandidateBody = async (req: Request): Promise<boolean> => {
+export const validateCandidateBody = (req: Request): boolean => {
   const {
     _id,
     jobId,
@@ -67,11 +68,9 @@ export const validateCandidateBody = async (req: Request): Promise<boolean> => {
     totalScore,
   } = req.body;
 
-  const isJobIdValid = await validateJobId(jobId);
-
   return (
     validateId(_id) &&
-    isJobIdValid &&
+    validateJobId(jobId) &&
     validateString(firstName) &&
     validateString(lastName) &&
     validateEmail(emailAddress) &&
@@ -87,11 +86,12 @@ export const validateCandidateBody = async (req: Request): Promise<boolean> => {
   );
 };
 
-export const validateJobBody = async (req: Request)=> {
+export const validateJobBody = (req: Request)=> {
   const { _id, jobId, name, location, date, companyDescription, jobDescription, requirements } = req.body;
 
   return (
     validateId(_id)&&
+    validateJobId(jobId) &&
     validateString(name) &&
     validateString(location) &&
     validateDate(date) &&

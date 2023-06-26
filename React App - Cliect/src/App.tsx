@@ -1,10 +1,8 @@
 import React from 'react';
-
-export default function App() {
-
-
-  return (
-    <div>
-    </div>
-  );
+import ApiUsage from './components/ApiUsage';
+function App() {
+  return (<ApiUsage />
+  )
 }
+
+export default App;
