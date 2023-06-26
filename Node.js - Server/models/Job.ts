@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { validateString, validateDate, validateRequirements } from '../utils/validator';
+import { validateString, validateDate, validateRequirements, validateId } from '../utils/validator';
 
 export interface IJob extends Document {
+  _id:string,
   name: string;
   location: string;
   date: Date;
@@ -11,6 +12,7 @@ export interface IJob extends Document {
 }
 
 const JobSchema: Schema = new Schema({
+  _id:{ type: String, required: true, validate: validateId },
   name: { type: String, required: true, validate: validateString },
   location: { type: String, required: true, validate: validateString },
   date: { type: Date, required: true, validate: validateDate },
@@ -21,6 +23,8 @@ const JobSchema: Schema = new Schema({
     required: true,
     validate: [validateRequirements, 'Invalid requirements'],
   },
+},{
+  versionKey: false,
 });
 
 export default mongoose.model<IJob>('Job', JobSchema);

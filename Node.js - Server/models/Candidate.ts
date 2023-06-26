@@ -1,8 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { validateId, validateString, validateEmail, validatePhone, validatePercentage, validateBoolean } from '../utils/validator';
+import { validateId, validateString, validateEmail, validatePhone, validatePercentage, validateBoolean, validateJobId } from '../utils/validator';
 
 export interface ICandidate extends Document {
-  positionId: string;
+  _id: string;
+  jobId: string,
   firstName: string;
   lastName: string;
   emailAddress: string;
@@ -14,11 +15,12 @@ export interface ICandidate extends Document {
   hasTaskPassed: boolean;
   hasJobOffer: boolean;
   isEmployed: boolean;
-  totalScore: string;
+  totalScore: number;
 }
 
 const CandidateSchema: Schema = new Schema({
-  positionId: { type: String, required: true, validate: validateId },
+  _id: { type: String, required: true, validate: validateId },
+  jobId: { type: String, required: true, validate: validateJobId },
   firstName: { type: String, required: true, validate: validateString },
   lastName: { type: String, required: true, validate: validateString },
   emailAddress: { type: String, required: true, validate: validateEmail },
@@ -30,7 +32,10 @@ const CandidateSchema: Schema = new Schema({
   hasTaskPassed: { type: Boolean, required: true, validate: validateBoolean },
   hasJobOffer: { type: Boolean, required: true, validate: validateBoolean },
   isEmployed: { type: Boolean, required: true, validate: validateBoolean },
-  totalScore: { type: String, required: true, validate: validateId },
+  totalScore: { type: Number, required: true, validate: validatePercentage },
+},
+{
+  versionKey: false,
 });
 
 export default mongoose.model<ICandidate>('Candidate', CandidateSchema);

@@ -8,6 +8,7 @@ const app=express();
 const port=3000;
 
 // app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/api/job', JobRouter);
 app.use('/api/candidate', CandidateRouter);

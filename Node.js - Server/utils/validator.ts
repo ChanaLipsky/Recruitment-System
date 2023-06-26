@@ -1,6 +1,7 @@
 import validator from 'validator';
 import { PhoneNumberUtil } from 'google-libphonenumber';
 import { Request } from 'express';
+import Job from '../models/Job';
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
@@ -33,6 +34,8 @@ export const validateId = (id: string): boolean => {
   return validator.isUUID(id);
 };
 
+
+
 export const validateDate = (date: string): boolean => {
   return validator.isDate(date);
 };
@@ -41,9 +44,15 @@ export const validateRequirements = (requirements: string[]): boolean => {
   return requirements.every((requirement) => typeof requirement === 'string' && validateString(requirement));
 };
 
-export const validateCandidateBody = (req: Request): boolean => {
+export const validateJobId = async (id: string): Promise<boolean> => {
+  const job = await Job.findOne({ id });
+  return !job;
+};
+
+export const validateCandidateBody = async (req: Request): Promise<boolean> => {
   const {
-    positionId,
+    _id,
+    jobId,
     firstName,
     lastName,
     emailAddress,
@@ -58,8 +67,11 @@ export const validateCandidateBody = (req: Request): boolean => {
     totalScore,
   } = req.body;
 
+  const isJobIdValid = await validateJobId(jobId);
+
   return (
-    validateId(positionId) &&
+    validateId(_id) &&
+    isJobIdValid &&
     validateString(firstName) &&
     validateString(lastName) &&
     validateEmail(emailAddress) &&
@@ -71,14 +83,15 @@ export const validateCandidateBody = (req: Request): boolean => {
     validateBoolean(hasTaskPassed) &&
     validateBoolean(hasJobOffer) &&
     validateBoolean(isEmployed) &&
-    validateId(totalScore)
+    validatePercentage(totalScore)
   );
 };
 
-export const validateJobBody = (req: Request): boolean => {
-  const { name, location, date, companyDescription, jobDescription, requirements } = req.body;
+export const validateJobBody = async (req: Request)=> {
+  const { _id, jobId, name, location, date, companyDescription, jobDescription, requirements } = req.body;
 
   return (
+    validateId(_id)&&
     validateString(name) &&
     validateString(location) &&
     validateDate(date) &&
