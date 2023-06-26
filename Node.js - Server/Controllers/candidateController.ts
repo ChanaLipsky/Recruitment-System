@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import Candidate, { ICandidate } from '../models/Candidate';
 import { generateUniqueId } from '../utils/uuidGenerator';
-import { validateCandidateBody } from '../utils/validator';
 export const createCandidate = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {
