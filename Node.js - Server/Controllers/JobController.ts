@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Job, { IJob } from '../models/Job';
-
-export const createJob = async (req: Request, res: Response): Promise<void> => {
+import { generateUniqueId } from '../utils/uuidGenerator';
+export const createJob = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {
       name,
@@ -11,8 +11,8 @@ export const createJob = async (req: Request, res: Response): Promise<void> => {
       jobDescription,
       requirements,
     } = req.body;
-
     const job: IJob = new Job({
+      _id: generateUniqueId(),
       name,
       location,
       date,
@@ -22,15 +22,16 @@ export const createJob = async (req: Request, res: Response): Promise<void> => {
     });
 
     const savedJob = await job.save();
-    res.json(savedJob);
+    return res.json(savedJob);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while creating the job.', error });
+    return res.status(500).json({ message: 'An error occurred while creating the job.', error });
   }
 };
 
-export const updateJob = async (req: Request, res: Response): Promise<void> => {
+export const updateJob = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {
+      _id,
       name,
       location,
       date,
@@ -42,6 +43,7 @@ export const updateJob = async (req: Request, res: Response): Promise<void> => {
     const job = await Job.findByIdAndUpdate(
       req.params.id,
       {
+        _id,
         name,
         location,
         date,
@@ -53,44 +55,44 @@ export const updateJob = async (req: Request, res: Response): Promise<void> => {
     );
 
     if (!job) {
-       res.status(404).json({ message: 'Job not found.' });
+       return res.status(404).json({ message: 'Job not found.' });
     }
 
-    res.json(job);
+    return res.json(job);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while updating the job.', error });
+    return res.status(500).json({ message: 'An error occurred while updating the job.', error });
   }
 };
 
-export const getJobs = async (_req: Request, res: Response): Promise<void> => {
+export const getJobs = async (_req: Request, res: Response): Promise<Response> => {
   try {
     const jobs = await Job.find();
-    res.json(jobs);
+    return res.json(jobs);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while fetching the jobs.', error });
+    return res.status(500).json({ message: 'An error occurred while fetching the jobs.', error });
   }
 };
 
-export const getJobById = async (req: Request, res: Response): Promise<void> => {
+export const getJobById = async (req: Request, res: Response): Promise<Response> => {
   try {
     const job = await Job.findById(req.params.id);
     if (!job) {
-       res.status(404).json({ message: 'Job not found.' });
+       return res.status(404).json({ message: 'Job not found.' });
     }
-    res.json(job);
+    return res.json(job);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while fetching the job.', error });
+    return res.status(500).json({ message: 'An error occurred while fetching the job.', error });
   }
 };
 
-export const deleteJob = async (req: Request, res: Response): Promise<void> => {
+export const deleteJob = async (req: Request, res: Response): Promise<Response> => {
   try {
     const job = await Job.findByIdAndDelete(req.params.id);
     if (!job) {
-       res.status(404).json({ message: 'Job not found.' });
+       return res.status(404).json({ message: 'Job not found.' });
     }
-    res.json({ message: 'Job deleted successfully.' });
+    return res.json({ message: 'Job deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while deleting the job.', error });
+    return res.status(500).json({ message: 'An error occurred while deleting the job.', error });
   }
 };

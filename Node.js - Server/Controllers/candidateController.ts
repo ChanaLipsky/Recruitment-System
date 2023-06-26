@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import Candidate, { ICandidate } from '../models/Candidate';
-
-export const createCandidate = async (req: Request, res: Response): Promise<void> => {
+import { generateUniqueId } from '../utils/uuidGenerator';
+import { validateCandidateBody } from '../utils/validator';
+export const createCandidate = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {
-      positionId,
+      jobId,
       firstName,
       lastName,
       emailAddress,
@@ -20,7 +21,8 @@ export const createCandidate = async (req: Request, res: Response): Promise<void
     } = req.body;
 
     const candidate: ICandidate = new Candidate({
-      positionId,
+      _id:generateUniqueId(),
+      jobId,
       firstName,
       lastName,
       emailAddress,
@@ -34,18 +36,18 @@ export const createCandidate = async (req: Request, res: Response): Promise<void
       isEmployed,
       totalScore,
     });
-
     const savedCandidate = await candidate.save();
-    res.json(savedCandidate);
+    return res.json(savedCandidate);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while creating the candidate.', error });
+    return res.status(500).json({ message: 'An error occurred while creating the candidate.', error });
   }
 };
 
-export const updateCandidate = async (req: Request, res: Response): Promise<void> => {
+export const updateCandidate = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {
-      positionId,
+      _id,
+      jobId,
       firstName,
       lastName,
       emailAddress,
@@ -63,7 +65,8 @@ export const updateCandidate = async (req: Request, res: Response): Promise<void
     const candidate = await Candidate.findByIdAndUpdate(
       req.params.id,
       {
-        positionId,
+        _id,
+        jobId,
         firstName,
         lastName,
         emailAddress,
@@ -81,44 +84,44 @@ export const updateCandidate = async (req: Request, res: Response): Promise<void
     );
 
     if (!candidate) {
-       res.status(404).json({ message: 'Candidate not found.' });
+       return res.status(404).json({ message: 'Candidate not found.' });
     }
 
-    res.json(candidate);
+    return res.json(candidate);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while updating the candidate.', error });
+    return res.status(500).json({ message: 'An error occurred while updating the candidate.', error });
   }
 };
 
-export const getCandidates = async (_req: Request, res: Response): Promise<void> => {
+export const getCandidates = async (_req: Request, res: Response): Promise<Response> => {
   try {
     const candidates = await Candidate.find();
-    res.json(candidates);
+    return res.json(candidates);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while fetching the candidates.', error });
+    return res.status(500).json({ message: 'An error occurred while fetching the candidates.', error });
   }
 };
 
-export const getCandidateById = async (req: Request, res: Response): Promise<void> => {
+export const getCandidateById = async (req: Request, res: Response): Promise<Response> => {
   try {
     const candidate = await Candidate.findById(req.params.id);
     if (!candidate) {
-       res.status(404).json({ message: 'Candidate not found.' });
+       return res.status(404).json({ message: 'Candidate not found.' });
     }
-    res.json(candidate);
+    return res.json(candidate);
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while fetching the candidate.', error });
+    return res.status(500).json({ message: 'An error occurred while fetching the candidate.', error });
   }
 };
 
-export const deleteCandidate = async (req: Request, res: Response): Promise<void> => {
+export const deleteCandidate = async (req: Request, res: Response): Promise<Response> => {
   try {
     const candidate = await Candidate.findByIdAndDelete(req.params.id);
     if (!candidate) {
-       res.status(404).json({ message: 'Candidate not found.' });
+       return res.status(404).json({ message: 'Candidate not found.' });
     }
-    res.json({ message: 'Candidate deleted successfully.' });
+   return res.json({ message: 'Candidate deleted successfully.' });
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while deleting the candidate.', error });
+    return res.status(500).json({ message: 'An error occurred while deleting the candidate.', error });
   }
 };
